@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import nltk
+import math
 
 class Classifier:
 
@@ -10,15 +11,16 @@ class Classifier:
 		self.labels = {}
 		self.wc_by_doc = {}
 		self.wc_by_class = {}
+		self.wc = {}
 		
 		self.nc = {}
 		self.n = 0
 
-		self.dictionary = []
+		self.dictionary = {}
 		self.dict_size = 0
 
 	# need Nc/N to get P(c)
-	# cmap = argmax[ log P(c) + SUM{ log P(t|c)}]
+	# max_prob = argmax[ log P(c) + SUM{ log P(t|c)}]
 
 	def get_training_files(self, corpus):
 		wd = os.getcwd()
@@ -57,6 +59,8 @@ class Classifier:
 				print("training on"+docname)
 			if docname not in self.wc_by_doc:
 				self.wc_by_doc[docname] = {}
+			if classname not in self.wc_by_class:
+				self.wc_by_class[classname] = {}
 
 			with open(os.path.join(dir_root, docname),'r') as doc:
 				text = doc.read().lower()
@@ -64,7 +68,7 @@ class Classifier:
 				for token in tokens:
 
 					if token not in self.dictionary:
-						self.dictionary.append(token)
+						self.dictionary[token] = 1
 						self.dict_size += 1
 
 					if token not in self.wc_by_doc[docname]:
@@ -76,15 +80,46 @@ class Classifier:
 						self.wc_by_class[classname][token] = 1
 					else:
 						self.wc_by_class[classname][token] += 1
+
+					if classname not in self.wc:
+						self.wc[classname] = 1
+					else:
+						self.wc[classname] += 1
 		return
 
-	def get_priors(self):
+	def get_priors(self, token_count):
 
 
 		return
 
+	def test(self):
+		dir_root = os.getcwd() + "/TC_provided/"
+		test_files = os.getcwd() + "/TC_provided/corpus1_test.list"
 
+		for fname in open(test_files):
+			fname = fname.split()[0]
 
+			with open(os.path.join(dir_root,fname),'r') as doc:
+				max_prob = -99999999
+				prior = {}
+				max_class = "asdf"
+				text = doc.read().lower()
+				regex_tokenizer = nltk.tokenize.RegexpTokenizer('[a-zA-Z]+')
+				tokens = regex_tokenizer.tokenize(text)
 
-	
-	
+				for curr_class in self.wc_by_class:
+					curr_prob = np.log(self.nc[curr_class]) - np.log(self.n)
+					for token in tokens:
+						if token not in self.wc_by_class[curr_class]:
+							curr_prob -= np.log(self.wc[curr_class] + self.dict_size)
+						else:
+							curr_prob += np.log(self.wc_by_class[curr_class][token] + 1)
+							curr_prob -= np.log(self.wc[curr_class] + self.dict_size)
+
+					if curr_prob > max_prob:
+						max_prob = curr_prob
+						max_class = curr_class
+					print(curr_class,curr_prob)
+
+				print ("max:",max_class,curr_prob)
+		return

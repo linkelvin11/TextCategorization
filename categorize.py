@@ -9,6 +9,8 @@ classy.get_training_files("corpus1")
 
 classy.get_wc()
 
+classy.test()
+
 print (classy.dict_size)
 
 print ("done")
