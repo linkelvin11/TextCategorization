@@ -5,10 +5,13 @@ import tc_bayes
 import numpy as np
 
 classy = tc_bayes.Classifier(0)
-classy.get_training_files("corpus1")
-
+files = input("enter relative path to training set: ")
+print("training based on provided training set:",files)
+classy.get_training_files(files)
 classy.get_wc()
 
-classy.test()
+files = input("enter relative path to test set: ")
+print("testing set:",files)
+classy.test(files)
 
 print ("done")

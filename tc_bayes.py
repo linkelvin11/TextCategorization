@@ -21,13 +21,15 @@ class Classifier:
 
 		self.regex = '[a-zA-z]+'
 
-	# need Nc/N to get P(c)
-	# max_prob = argmax[ log P(c) + SUM{ log P(t|c)}]
+		self.stop_words = {}
+		for word in open("stop_words.txt",'r'):
+			self.stop_words[word.rstrip()] = 1
+
+		return
 
 	def get_training_files(self, corpus):
 		wd = os.getcwd() + "/"
-		corpus_root = wd + corpus
-		training_files = corpus_root + "_train.labels"
+		training_files = wd + corpus
 
 		if self.verbose:
 			print(os.path.abspath(training_files))
@@ -69,6 +71,9 @@ class Classifier:
 				tokens = regex_tokenizer.tokenize(text)
 				for token in tokens:
 
+					if token in self.stop_words:
+						continue
+
 					if token not in self.dictionary:
 						self.dictionary[token] = 1
 						self.dict_size += 1
@@ -89,14 +94,14 @@ class Classifier:
 						self.wc[classname] += 1
 		return
 
-	def test(self):
-		dir_root = os.getcwd()
-		test_files = os.getcwd() + "/corpus1_test.list"
+	def test(self, corpus):
+		dir_root = os.getcwd() + "/"
+		test_files = dir_root + corpus
 
 		output = open("output.txt",'w')
 
 		for fname in open(test_files):
-			fname = fname.split()[0]
+			fname = fname.rstrip()
 
 			with open(os.path.join(dir_root,fname),'r') as doc:
 				max_prob = -99999999
@@ -109,6 +114,9 @@ class Classifier:
 				for curr_class in self.wc_by_class:
 					curr_prob = np.log(self.nc[curr_class]) - np.log(self.n)
 					for token in tokens:
+						if token in self.stop_words:
+							continue
+
 						if token not in self.wc_by_class[curr_class]:
 							curr_prob -= np.log(self.wc[curr_class] + self.dict_size)
 						else:
