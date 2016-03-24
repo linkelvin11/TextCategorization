@@ -19,7 +19,7 @@ class Classifier:
 		self.dictionary = {}
 		self.dict_size = 0
 
-		self.regex = '[a-zA-z]+'
+		self.regex = '[a-zA-z\.]+'
 
 		self.stop_words = {}
 		for word in open("stop_words.txt",'r'):
