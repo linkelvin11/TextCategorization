@@ -19,12 +19,14 @@ class Classifier:
 		self.dictionary = {}
 		self.dict_size = 0
 
+		self.regex = '[a-zA-z]+'
+
 	# need Nc/N to get P(c)
 	# max_prob = argmax[ log P(c) + SUM{ log P(t|c)}]
 
 	def get_training_files(self, corpus):
-		wd = os.getcwd()
-		corpus_root = wd + "/TC_provided/" + corpus
+		wd = os.getcwd() + "/"
+		corpus_root = wd + corpus
 		training_files = corpus_root + "_train.labels"
 
 		if self.verbose:
@@ -50,8 +52,8 @@ class Classifier:
 		return self.labels
 
 	def get_wc(self):
-		dir_root = os.getcwd() + "/TC_provided/"
-		regex_tokenizer = nltk.tokenize.RegexpTokenizer('[a-zA-Z]+')
+		dir_root = os.getcwd() + "/"
+		regex_tokenizer = nltk.tokenize.RegexpTokenizer(self.regex)
 		for docname in self.labels:
 			classname = self.labels[docname]
 
@@ -87,14 +89,11 @@ class Classifier:
 						self.wc[classname] += 1
 		return
 
-	def get_priors(self, token_count):
-
-
-		return
-
 	def test(self):
-		dir_root = os.getcwd() + "/TC_provided/"
-		test_files = os.getcwd() + "/TC_provided/corpus1_test.list"
+		dir_root = os.getcwd()
+		test_files = os.getcwd() + "/corpus1_test.list"
+
+		output = open("output.txt",'w')
 
 		for fname in open(test_files):
 			fname = fname.split()[0]
@@ -104,7 +103,7 @@ class Classifier:
 				prior = {}
 				max_class = "asdf"
 				text = doc.read().lower()
-				regex_tokenizer = nltk.tokenize.RegexpTokenizer('[a-zA-Z]+')
+				regex_tokenizer = nltk.tokenize.RegexpTokenizer(self.regex)
 				tokens = regex_tokenizer.tokenize(text)
 
 				for curr_class in self.wc_by_class:
@@ -119,7 +118,9 @@ class Classifier:
 					if curr_prob > max_prob:
 						max_prob = curr_prob
 						max_class = curr_class
-					print(curr_class,curr_prob)
-
-				print ("max:",max_class,curr_prob)
+					if self.verbose:
+						print(curr_class,curr_prob)
+				if self.verbose:
+					print ("max:",max_class,curr_prob)
+				output.write(fname+" "+max_class+"\n")
 		return

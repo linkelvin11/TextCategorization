@@ -11,6 +11,4 @@ classy.get_wc()
 
 classy.test()
 
-print (classy.dict_size)
-
 print ("done")
